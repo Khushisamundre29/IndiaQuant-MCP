@@ -1,17 +1,11 @@
 import pandas as pd
 import numpy as np
 
+# Technical indicators for trading signals
 
-# ── RSI ─────────────────────────────────────────────────────────────
 
 def compute_rsi(close: pd.Series, period: int = 14) -> pd.Series:
-    """
-    Relative Strength Index.
-    RSI = 100 - (100 / (1 + avg_gain / avg_loss))
-
-    < 30  → oversold (possible buy)
-    > 70  → overbought (possible sell)
-    """
+    # RSI calculation
     delta = close.diff()
 
     gain = delta.clip(lower=0)   # keep only positive moves
@@ -26,17 +20,8 @@ def compute_rsi(close: pd.Series, period: int = 14) -> pd.Series:
     return rsi
 
 
-# ── MACD ─────────────────────────────────────────────────────────────
-
 def compute_macd(close: pd.Series, fast=12, slow=26, signal=9):
-    """
-    MACD = EMA(12) - EMA(26)
-    Signal line = EMA(9) of MACD
-    Histogram = MACD - Signal
-
-    When MACD crosses above signal → bullish
-    When MACD crosses below signal → bearish
-    """
+    # MACD calculation
     ema_fast   = close.ewm(span=fast,   adjust=False).mean()
     ema_slow   = close.ewm(span=slow,   adjust=False).mean()
     macd_line  = ema_fast - ema_slow
@@ -46,17 +31,8 @@ def compute_macd(close: pd.Series, fast=12, slow=26, signal=9):
     return macd_line, signal_line, histogram
 
 
-# ── Bollinger Bands ──────────────────────────────────────────────────
-
 def compute_bollinger_bands(close: pd.Series, period=20, std_devs=2.0):
-    """
-    Middle band = 20-day SMA
-    Upper band  = Middle + 2 * std dev
-    Lower band  = Middle - 2 * std dev
-
-    Price touching lower band → oversold
-    Price touching upper band → overbought
-    """
+    # Bollinger Bands
     middle = close.rolling(window=period).mean()
     std    = close.rolling(window=period).std()
     upper  = middle + std_devs * std
@@ -65,26 +41,16 @@ def compute_bollinger_bands(close: pd.Series, period=20, std_devs=2.0):
     return upper, middle, lower
 
 
-# ── EMA ──────────────────────────────────────────────────────────────
-
 def compute_ema(close: pd.Series, span: int) -> pd.Series:
+    # Exponential moving average
     return close.ewm(span=span, adjust=False).mean()
 
 
-# ── Signal Score ─────────────────────────────────────────────────────
-
 def compute_signal_score(df: pd.DataFrame) -> dict:
-    """
-    Takes OHLCV dataframe, runs all indicators,
-    and returns a score from -100 to +100.
-
-    Positive = bullish, Negative = bearish.
-    We also return each indicator's value so Claude can explain it.
-    """
+    # Compute signal score from all indicators
     close  = df["Close"]
     volume = df["Volume"]
 
-    # ── compute everything ──
     rsi_series                     = compute_rsi(close)
     macd_line, signal_line, hist   = compute_macd(close)
     upper_bb, mid_bb, lower_bb     = compute_bollinger_bands(close)
@@ -107,8 +73,6 @@ def compute_signal_score(df: pd.DataFrame) -> dict:
     vol_avg   = float(volume.rolling(20).mean().iloc[-1])
     vol_now   = float(volume.iloc[-1])
     vol_ratio = round(vol_now / vol_avg, 2) if vol_avg > 0 else 1.0
-
-    # ── score each indicator on a simple scale ──
 
     # RSI: oversold gives +points, overbought gives -points
     if rsi < 30:
@@ -152,7 +116,6 @@ def compute_signal_score(df: pd.DataFrame) -> dict:
     price_dir = 1 if curr > float(close.iloc[-2]) else -1
     vol_score = 30 * price_dir if vol_ratio > 1.5 else 0
 
-    # ── weighted average ──
     weights = {
         "rsi":    0.25,
         "macd":   0.30,
@@ -188,11 +151,7 @@ def compute_signal_score(df: pd.DataFrame) -> dict:
 
 
 def score_to_signal(tech_score: float, sentiment_score: float) -> dict:
-    """
-    Combine technical score (65% weight) and
-    sentiment score (-1 to 1, 35% weight) into
-    a final BUY / SELL / HOLD call with confidence %.
-    """
+    # Convert scores to buy/sell/hold
     # normalize sentiment from [-1,1] to [-100,100]
     sent_normalized = sentiment_score * 100
 
