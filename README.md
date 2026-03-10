@@ -1,4 +1,4 @@
-# IndiaQuant MCP 4
+# IndiaQuant MCP AI Stock Market Assistant for Claude Desktop
 
 A real-time Indian stock market AI assistant built with Model Context Protocol (MCP). Connects to Claude Desktop and gives it full NSE/BSE market intelligence plus virtual trading capabilities using 100% free APIs.
 
