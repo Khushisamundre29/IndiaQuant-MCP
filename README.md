@@ -16,30 +16,23 @@ Without this MCP, Claude knows nothing about today's Nifty price or whether Reli
 - "Is there unusual options activity on Infosys today?"
 
 ---
+## Features
+
+• Real-time Indian stock market data (NSE/BSE)  
+• Options chain analysis with Greeks calculation  
+• AI-generated trading signals using technical indicators  
+• News sentiment analysis for stocks  
+• Sector heatmap and market scanner  
+• Virtual paper trading portfolio  
+• Portfolio P&L tracking  
+• Seamless integration with Claude Desktop using MCP  
+
+---
 
 ## Architecture
 
-```
-indiaquant-mcp/
-├── server/server.py          ← MCP entry point, registers all 10 tools
-├── modules/
-│   ├── market_data.py        ← Live prices via yfinance (with 20s cache)
-│   ├── indicators.py         ← RSI, MACD, Bollinger Bands from scratch
-│   ├── greeks.py             ← Full Black-Scholes implementation
-│   ├── options.py            ← Options chain, max pain, unusual activity
-│   └── sentiment.py         ← News fetching + lexicon-based scoring
-├── tools/
-│   ├── price_tool.py         ← get_live_price
-│   ├── signal_tool.py        ← generate_signal
-│   ├── options_tool.py       ← options chain + greeks + unusual activity
-│   ├── portfolio_tool.py     ← portfolio P&L + virtual trades
-│   └── market_tool.py       ← market scan + sector heatmap
-├── database/portfolio_db.py  ← SQLite virtual portfolio
-├── config/settings.py        ← All constants and API config
-├── utils/helpers.py          ← Shared utility functions
-└── tests/                    ← 35 unit tests, all passing
-```
-
+<img width="3353" height="1205" alt="image" src="https://github.com/user-attachments/assets/b5f28651-9cde-4d2b-bfb9-3c187bb31e42" />
+Claude Desktop communicates with the MCP server, which processes requests through different analytics modules and fetches data from market APIs.
 ---
 
 ## Free API Stack
@@ -189,3 +182,5 @@ pytest tests/ -v
   "summary": "BUY near Rs1680. Stop loss: Rs1623. Target: Rs1798."
 }
 ```
+## Author
+Khushi Samundre  
